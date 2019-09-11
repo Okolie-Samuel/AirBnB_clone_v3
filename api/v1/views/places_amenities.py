@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 """Module for Place related endpoints"""
 from api.v1.views import app_views
-from api.v1.views import *
 from flask import jsonify, make_response, abort, request
 from models import storage
-from models.amenity import Review
 
 model = "Amenity"
 parent_model = "Place"
@@ -18,7 +16,15 @@ def get_amenities(place_id):
 
 
 @app_views.route("/places/<place_id>/amenities/<amenity_id>",
-                 methods=["DELETE"])
+                 strict_slashes=False, methods=["DELETE", "POST"])
+def process_amenity(place_id, amenity_id):
+    """Process request type"""
+    if request.method == "DELETE":
+        return delete_amenity(place_id, amenity_id)
+    else:
+        return post_amenity(place_id, amenity_id)        
+
+
 def delete_amenity(place_id, amenity_id):
     """DELETE /amenity api route"""
     place = storage.get(parent_model, place_id)
@@ -39,8 +45,6 @@ def delete_amenity(place_id, amenity_id):
     return make_response(jsonify({}), 200)
 
 
-@app_views.route("/places/<place_id>/amenities/<amenity_id>",
-                 strict_slashes=False, methods=["POST"])
 def post_amenity(place_id, amenity_id):
     """POST /amenities api route"""
     place = storage.get(parent_model, place_id)
