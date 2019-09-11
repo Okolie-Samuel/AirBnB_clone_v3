@@ -164,3 +164,28 @@ class TestFileStorage(unittest.TestCase):
         self.assertTrue(("User." + u.id) in storage.all(User))
         self.assertFalse(("Place." + p.id) in storage.all(Place))
         self.assertFalse(("Review." + r.id) in storage.all(Review))
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get_amenites_from_place(self):
+        """gets all amenities"""
+        from models import storage
+        import requests
+        n = str(randint(0, 100))
+        s = State(name="Kali" + n)
+        s.save()
+        c = City(name="Frisco" + n, state_id=s.id)
+        c.save()
+        u = User(name="Userio" + n, email="foo" + n, password="bar")
+        u.save()
+        p = Place(name="Housy" + n, city_id=c.id, user_id=u.id)
+        p.save()
+        a = Amenity(name="SuperWIFI" + n)
+        a.save()
+        p.amenities.append(a)
+        p.save()
+
+        url = "http://localhost:5000/api/v1/places/{}/amenities".format(p.id)
+        r = requests.get(url)
+        self.assertTrue(r is not None)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn(a.id, [d["id"] for d in r.json()])

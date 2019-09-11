@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Module for Place related endpoints"""
 from api.v1.views import app_views
+from api.v1.views import *
 from flask import jsonify, make_response, abort, request
 from models import storage
 
@@ -22,7 +23,7 @@ def process_amenity(place_id, amenity_id):
     if request.method == "DELETE":
         return delete_amenity(place_id, amenity_id)
     else:
-        return post_amenity(place_id, amenity_id)        
+        return post_amenity(place_id, amenity_id)
 
 
 def delete_amenity(place_id, amenity_id):
