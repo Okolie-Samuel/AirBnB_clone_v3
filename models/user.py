@@ -46,5 +46,5 @@ class User(BaseModel, Base):
     def __setattr__(self, att_name, value):
         """setattr for encrypt on new password"""
         if att_name == "password":
-            value = md5(value.encode()).digest()
+            value = md5(value.encode()).hexdigest()
         super().__setattr__(att_name, value)
