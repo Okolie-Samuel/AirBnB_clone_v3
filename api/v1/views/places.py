@@ -45,3 +45,34 @@ def put_place(place_id):
     """PUT /places api route"""
     ignore_data = ["id", "created_at", "updated_at", "user_id", "city_id"]
     return put_model(model, place_id, ignore_data)
+
+
+@app_views.route("/places_search", strict_slashes=False,
+                 methods=["POST"])
+def search_places():
+    """search for request places in database"""
+    data = request.get_json(force=True, silent=True)
+    if not data:
+        abort(400, 'Not a JSON')
+    ok = {"states", "cities", "amenities"}
+    if not len(data) or all([len(v) == 0 for k, v in data.items() if k in ok]):
+        return jsonify([p.to_dict() for p in storage.all("Place").values()])
+    state_places = []
+    city_places = []
+
+    if len(data["states"]):
+        states = [storage.get("State", id) for id in data["states"]]
+        state_places = [place.to_dict() for place in city.places
+                        for city in state.cities for state in states]
+
+    if len(data["cities"]):
+        cities = [storage.get("City", id) for id in data["cities"]]
+        city_places = [place.to_dict() for place in city.places
+                       for city in cities]
+
+    places = state_places + city_places
+    if len(data["amenities"]):
+        amenities = [storage.get("Amenity", id) for id in data["amenities"]]
+        places = [place for place in places
+                  if all([a in place.amenities for a in amenities])]
+    return jsonify([place.to_dict() for place in places])
