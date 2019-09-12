@@ -52,9 +52,9 @@ def put_place(place_id):
 def search_places():
     """search for request places in database"""
     data = request.get_json(force=True, silent=True)
-    #  print("DATA:", request.data)
     if data is None:
         abort(400, 'Not a JSON')
+
     ok = {"states", "cities"}
     places = []
     if not len(data) or all([len(v) == 0 for k, v in data.items() if k in ok]):
@@ -62,24 +62,18 @@ def search_places():
 
     if len(data.get("states", [])):
         states = [storage.get("State", id) for id in data["states"]]
-        #  print("STATES:", states)
         [[[places.append(place) for place in city.places]
          for city in state.cities] for state in states if state]
-        #  print("STATE_PLACES:", places)
 
     if len(data.get("cities", [])):
         cities = [storage.get("City", id) for id in data["cities"]]
-        #  print("CITIES:", cities)
         [[places.append(place) for place in city.places]
          for city in cities if city]
-        #  print("CITY_PLACES:", places)
 
     places = list(set(places))
     if len(data.get("amenities", [])):
         amenities = [storage.get("Amenity", id) for id in data["amenities"]]
-        #  print("AMENITIES:", amenities)
         places = [place for place in places
                   if all([a in place.amenities for a in amenities])]
-    #  print("PLACES LAST:", places)
-    #  print("PLACES COMP:", [place.to_dict() for place in places])
+
     return jsonify([place.to_dict() for place in places])
