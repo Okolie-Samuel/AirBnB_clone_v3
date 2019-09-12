@@ -54,25 +54,28 @@ def search_places():
     data = request.get_json(force=True, silent=True)
     if not data:
         abort(400, 'Not a JSON')
-    ok = {"states", "cities", "amenities"}
+    ok = {"states", "cities"}
+    places = []
     if not len(data) or all([len(v) == 0 for k, v in data.items() if k in ok]):
-        return jsonify([p.to_dict() for p in storage.all("Place").values()])
-    state_places = []
-    city_places = []
+        places = storage.all("Place").values()
 
-    if len(data["states"]):
+    if len(data.get("states", [])):
         states = [storage.get("State", id) for id in data["states"]]
-        state_places = [place.to_dict() for place in city.places
-                        for city in state.cities for state in states]
+        #  print("STATES:", states)
+        [[[places.append(place) for place in city.places]
+         for city in state.cities] for state in states if state]
+        #  print("STATE_PLACES:", places)
 
-    if len(data["cities"]):
+    if len(data.get("cities", [])):
         cities = [storage.get("City", id) for id in data["cities"]]
-        city_places = [place.to_dict() for place in city.places
-                       for city in cities]
+        #  print("CITIES:", cities)
+        [[places.append(place) for place in city.places]
+         for city in cities if city]
+        #  print("CITY_PLACES:", places)
 
-    places = state_places + city_places
-    if len(data["amenities"]):
+    places = list(set(places))
+    if len(data.get("amenities", [])):
         amenities = [storage.get("Amenity", id) for id in data["amenities"]]
         places = [place for place in places
                   if all([a in place.amenities for a in amenities])]
-    return jsonify([place.to_dict() for place in places])
+    return jsonify([place.to_dict() for place in places if place])
