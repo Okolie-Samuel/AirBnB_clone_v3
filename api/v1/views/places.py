@@ -53,7 +53,7 @@ def search_places():
     """search for request places in database"""
     data = request.get_json(force=True, silent=True)
     #  print("DATA:", request.data)
-    if not data:
+    if data is None:
         abort(400, 'Not a JSON')
     ok = {"states", "cities"}
     places = []
