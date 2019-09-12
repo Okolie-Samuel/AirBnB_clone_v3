@@ -39,10 +39,10 @@ def delete_amenity(place_id, amenity_id):
         return make_response(jsonify({"error": "Not found"}), 404)
 
     # storage.delete(amenity)
-    if getenv("HBNB_TYPE_STORAGE") != "db":
-        place.amenities.remove(amenity)
-    else:
-        storage.delete(amenity)
+    # if getenv("HBNB_TYPE_STORAGE") != "db":
+    place.amenities.remove(amenity)
+    # else:
+    #    storage.delete(amenity)
 
     storage.save()
     return make_response(jsonify({}), 200)
