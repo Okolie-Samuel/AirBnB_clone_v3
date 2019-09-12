@@ -38,7 +38,13 @@ class User(BaseModel, Base):
 
     def __init__(self, *args, **kwargs):
         """initializes user"""
-        if "password" in kwargs:
+        """if "password" in kwargs:
             kwargs["password"] = \
-                md5(kwargs["password"].encode('utf-8')).digest()
+                md5(kwargs["password"].encode('utf-8')).digest()"""
         super().__init__(*args, **kwargs)
+
+    def __setattr__(self, att_name, value):
+        """setattr for encrypt on new password"""
+        if att_name == "password":
+            value = md5(value.encode()).digest()
+        super().__setattr__(att_name, value)
